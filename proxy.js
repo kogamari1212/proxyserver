@@ -1,20 +1,27 @@
 const express = require('express');
 const axios = require('axios');
-const cors = require('cors'); // CORSライブラリを追加
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CORS設定
-app.use(cors()); // 全てのオリジンを許可（安全性を考慮して必要に応じて制限する）
+// CORSを許可（全てのオリジンを許可）
+app.use(cors());
 
 app.get('/proxy', async (req, res) => {
   const eventId = req.query.event_id;
+  if (!eventId) {
+    res.status(400).send('Event ID is required');
+    return;
+  }
+
   const apiUrl = `https://connpass.com/api/v1/event/?event_id=${eventId}`;
+
   try {
     const response = await axios.get(apiUrl);
     res.json(response.data);
   } catch (error) {
+    console.error('Error fetching data:', error.message);
     res.status(500).send('Error fetching data');
   }
 });
@@ -22,4 +29,3 @@ app.get('/proxy', async (req, res) => {
 app.listen(port, () => {
   console.log(`Proxy server running on port ${port}`);
 });
-
