@@ -5,7 +5,7 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CORSを許可（全てのオリジンを許可）
+// CORSを許可
 app.use(cors());
 
 app.get('/proxy', async (req, res) => {
@@ -18,10 +18,14 @@ app.get('/proxy', async (req, res) => {
   const apiUrl = `https://connpass.com/api/v1/event/?event_id=${eventId}`;
 
   try {
-    const response = await axios.get(apiUrl);
+    const response = await axios.get(apiUrl, {
+      headers: {
+        'User-Agent': 'connpass-proxy/1.0 (https://connpass-proxy.onrender.com)', // User-Agentを設定
+      },
+    });
     res.json(response.data);
   } catch (error) {
-    console.error('Error fetching data:', error.message);
+    console.error('Error fetching data from Connpass API:', error.message);
     res.status(500).send('Error fetching data');
   }
 });
